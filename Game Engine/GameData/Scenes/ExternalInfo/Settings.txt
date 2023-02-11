@@ -1,0 +1,2 @@
+﻿CameraPos=15,8.4
+DrawHitboxes=false

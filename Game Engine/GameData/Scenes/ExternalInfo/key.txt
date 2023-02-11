@@ -1,0 +1,7 @@
+Air=0,0,0,0
+Tile=0,0,0,255
+FakeTile=64,64,64,255
+PepsiCan=0,0,255,255
+Crocodile=0,255,0,255
+GrassTile=0,110,0,255
+DirtTile=86,21,0,255

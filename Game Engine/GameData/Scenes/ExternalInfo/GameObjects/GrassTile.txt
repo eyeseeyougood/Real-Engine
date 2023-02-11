@@ -1,0 +1,4 @@
+﻿hasCollider=true
+isTrigger=false
+triggerFunction=null
+offset=0,0

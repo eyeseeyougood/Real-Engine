@@ -1,0 +1,6 @@
+﻿Tile=null
+FakeTile=null
+PepsiCan=PepsiCan
+Crocodile=Player
+GrassTile=null
+DirtTile=null

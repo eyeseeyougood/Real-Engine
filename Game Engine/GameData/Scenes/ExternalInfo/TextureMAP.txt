@@ -1,0 +1,6 @@
+﻿Tile=Tile
+FakeTile=Tile
+PepsiCan=PepsiCan
+Crocodile=Player_Right
+GrassTile=GrassTile
+DirtTile=DirtTile
