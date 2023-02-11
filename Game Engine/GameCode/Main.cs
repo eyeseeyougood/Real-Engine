@@ -98,6 +98,7 @@ booter.UIElements.Add(PepsiCanUI);
 
 // Load Scene
 SceneManager.SetupScenes(projectDirectory + @"\GameData\Scenes");
-SceneManager.LoadScene(SceneManager.SceneID + 1);
+//SceneManager.LoadScene(SceneManager.SceneID + 0);
+SceneManager.LoadScene("Fridge");
 
 booter.Setup(new Vector2(1007, 100), new Vector2(1920/2, 1080/2), 2);

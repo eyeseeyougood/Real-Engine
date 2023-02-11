@@ -69,13 +69,49 @@ namespace Game_Engine
                 Loader.Load(Scenes[_sceneID].Path, Scenes[_sceneID].Name, currentLayer);
                 currentLayer++;
             }
+            
+            return 0;
+        }
+
+        public static int LoadScene(string _sceneName) // if returns 1 then scene does not exist or is missing from scenes list, 0 means successfull
+        {
+            Booter booter = EngineManager.booterInstance;
+
+            int _sceneID = -1;
+            int currID = 0;
+            foreach (Scene scene in Scenes) // find scene id using name
+            {
+                if (scene.Name == _sceneName)
+                {
+                    _sceneID = currID;
+                    break;
+                }
+                currID++;
+            }
+
+            if (!ValidScene(_sceneID)) // if it hasn't found a scene it will be an invalid scene ID
+                return 1;
+
+            int total = booter.Objects.Count;
+            for (int x = 0; x < total - 1; x++)
+            {
+                booter.Objects[x].Destroy();
+            }
+
+            int layerCount = Directory.GetDirectories(Scenes[_sceneID].Path).Length;
+            int currentLayer = 0;
+            while (currentLayer < layerCount)
+            {
+                Loader.Load(Scenes[_sceneID].Path, Scenes[_sceneID].Name, currentLayer);
+                currentLayer++;
+            }
 
             return 0;
         }
 
         static bool ValidScene(int id)
         {
-            return id < Scenes.Count;
+            return id < Scenes.Count && id >= 0;
         }
     }
 }
