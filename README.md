@@ -2,7 +2,7 @@
 
 ### Basic setup
 In the main file, create a new Booter instance and CollisionManager instance
-these are use to handle UI, GameObjects, and Colliders.
+these ared use to handle UI, GameObjects, and Colliders.
 
 the way the engine is made allows you either create objects manually in the main file,
 or automatically using scenes in the SceneManager.
@@ -12,7 +12,7 @@ is to create a new instance of the GameObject class and
 set it's variables. To enable the game to use this object and render it,
 it MUST be added to the booter's 'Objects' list.
 
-To start the engine the booter's Setup() function must be ran.
+To start the engine the booter's Setup() function must be ran. This must be the last line in the Main file.
 
 ### How to make a tick function:
 Make a function that returns void (can be public or private)
@@ -107,7 +107,7 @@ Layout : -[name] - [type] - [what it is / what it's for] - [when & how it is set
   -Start(Engine instance, List<GameObject> _Objects, List<UIElement> _UIelems, List<KeyValuePair<Vector4, Vector4>> _DebugRects, List<IntPtr> _gameTextures) - List<List<IntPtr>> - Starts the game loop which handles rendering objects, UI, debug rects, points and returns the IntPtrs that point to surfaces and textures to clean up (clean up done at the end of 'Booter'->'Setup()')
 
  
-## How to set triggers in maps
+## How to set triggers in maps -- out dated (WON'T WORK WITH ARGUMENTS)
  
  To set triggers, you need to make a separate cs file with a class for the object (with the exact name of the object in the map) with the function to run when the trigger starts (this can contain as many and whatever arguments you want as an object array). Inside the object's properties file the exact function name must be specified, and the new Class' name must be the exact same name as the Object
 An example:
