@@ -44,14 +44,14 @@ void Tick(List<string> currentKeys)
         if (currentKeys.Contains("A"))
         {
             Player.Movement(new Vector2(-1, 0) * MoveSpeed);
-            Player.SetSprite(0);
+            Player.spriteRenderer().FlipX = true;
         }
         if (currentKeys.Contains("D"))
         {
             Player.Movement(new Vector2(1, 0) * MoveSpeed);
-            Player.SetSprite(1);
+            Player.spriteRenderer().FlipX = false;
         }
-    }    
+    }
 }
 
 void OnObjectLoaded(GameObject obj)
@@ -99,6 +99,6 @@ booter.UIElements.Add(PepsiCanUI);
 // Load Scene
 SceneManager.SetupScenes(projectDirectory + @"\GameData\Scenes");
 //SceneManager.LoadScene(SceneManager.SceneID + 0);
-SceneManager.LoadScene("Fridge");
+SceneManager.LoadScene("Scene1");
 
 booter.Setup(new Vector2(1007, 100), new Vector2(1920/2, 1080/2), 2);

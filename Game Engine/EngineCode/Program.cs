@@ -263,10 +263,14 @@ namespace engine // This whole thing has a massive memory leak somewhere!
                     (byte)200,
                     255); // clear screen colour
 
-                //if (Objects)
                 foreach (GameObject i in Objects)
                 {
-                    if (i.TexturePath == "Rect")
+                    SpriteRenderer spriteRenderer = (SpriteRenderer)i.GetComponent("SpriteRenderer");
+
+                    if (spriteRenderer == null)
+                        continue; // move on - No SpriteRenderer on this GameObject
+
+                    if (spriteRenderer.TexturePath == "Rect")
                     {
                         Vector2 ScreenSpaceCoords = GameObject.WorldToScreenSpace(instance.booter, i.WorldPosition);
                         SDL.SDL_Rect src = new SDL.SDL_Rect();
@@ -274,14 +278,14 @@ namespace engine // This whole thing has a massive memory leak somewhere!
                         src.y = (int)ScreenSpaceCoords.Y;
                         src.w = (int)i.Scale.X;
                         src.h = (int)i.Scale.Y;
-                        byte R = (byte)i.TextureColour.X;
-                        byte G = (byte)i.TextureColour.Y;
-                        byte B = (byte)i.TextureColour.Z;
-                        byte A = (byte)i.TextureColour.W;
+                        byte R = (byte)spriteRenderer.TextureColour.X;
+                        byte G = (byte)spriteRenderer.TextureColour.Y;
+                        byte B = (byte)spriteRenderer.TextureColour.Z;
+                        byte A = (byte)spriteRenderer.TextureColour.W;
                         SDL.SDL_SetRenderDrawColor(instance.Renderer, R, G, B, A);
                         SDL.SDL_RenderDrawRect(instance.Renderer, ref src);
                     }
-                    else if (i.TexturePath == "FilledRect")
+                    else if (spriteRenderer.TexturePath == "FilledRect")
                     {
                         Vector2 ScreenSpaceCoords = GameObject.WorldToScreenSpace(instance.booter, i.WorldPosition);
                         SDL.SDL_Rect src = new SDL.SDL_Rect();
@@ -289,16 +293,16 @@ namespace engine // This whole thing has a massive memory leak somewhere!
                         src.y = (int)ScreenSpaceCoords.Y;
                         src.w = (int)i.Scale.X;
                         src.h = (int)i.Scale.Y;
-                        byte R = (byte)i.TextureColour.X;
-                        byte G = (byte)i.TextureColour.Y;
-                        byte B = (byte)i.TextureColour.Z;
-                        byte A = (byte)i.TextureColour.W;
+                        byte R = (byte)spriteRenderer.TextureColour.X;
+                        byte G = (byte)spriteRenderer.TextureColour.Y;
+                        byte B = (byte)spriteRenderer.TextureColour.Z;
+                        byte A = (byte)spriteRenderer.TextureColour.W;
                         SDL.SDL_SetRenderDrawColor(instance.Renderer, R, G, B, A);
                         SDL.SDL_RenderFillRect(instance.Renderer, ref src); 
                     }
                     else
                     {
-                        IntPtr image = GameTextures[instance.PathToIndex[i.TexturePath]];
+                        IntPtr image = GameTextures[instance.PathToIndex[spriteRenderer.TexturePath]];
                         //TexturePtrs.Add(image);
                         int W;
                         int H;
@@ -311,8 +315,24 @@ namespace engine // This whole thing has a massive memory leak somewhere!
                         src.y = (int)ScreenSpaceCoords.Y;
                         src.w = W * (int)i.Scale.X * instance.booter.camera.CameraSize;
                         src.h = H * (int)i.Scale.Y * instance.booter.camera.CameraSize;
-                        i.TextureRes = new Vector2(W, H);
-                        SDL.SDL_RenderCopyEx(instance.Renderer, image, IntPtr.Zero, ref src, i.Rotation, IntPtr.Zero, SDL.SDL_RendererFlip.SDL_FLIP_NONE);
+                        spriteRenderer.TextureRes = new Vector2(W, H);
+
+                        SDL_RendererFlip flip = SDL_RendererFlip.SDL_FLIP_NONE;
+
+                        if (spriteRenderer.FlipX && !spriteRenderer.FlipY)
+                        {
+                            flip = SDL_RendererFlip.SDL_FLIP_HORIZONTAL;
+                        }
+                        else if (!spriteRenderer.FlipX && spriteRenderer.FlipY)
+                        {
+                            flip = SDL_RendererFlip.SDL_FLIP_VERTICAL;
+                        }
+                        else if (spriteRenderer.FlipX && spriteRenderer.FlipY)
+                        {
+                            flip = SDL_RendererFlip.SDL_FLIP_HORIZONTAL | SDL_RendererFlip.SDL_FLIP_VERTICAL;
+                        }
+
+                        SDL.SDL_RenderCopyEx(instance.Renderer, image, IntPtr.Zero, ref src, i.Rotation, IntPtr.Zero, flip);
                     }
                 }
 
@@ -428,22 +448,37 @@ namespace engine // This whole thing has a massive memory leak somewhere!
         public string Name;
         public string ObjName;
         public List<string> Tags;
-        public string TexturePath;
         public Vector2 WorldPosition;
         public Vector2 Scale;
-        public Vector2 TextureRes;
-        public Vector4 TextureColour;
         public double Rotation;
         public event Destroy destroy;
         public static event OnLoaded onLoaded;
         public List<Component> Components = new List<Component>();
 
-        public GameObject(string texturePath, Vector4 textureColour)
+        public GameObject()
         {
             Name = "defObject";
-            TexturePath = texturePath;
-            TextureColour = textureColour;
             Tags = new List<string>();
+        }
+
+        public GameObject(List<string> tags)
+        {
+            Name = "defObject";
+            Tags = tags;
+        }
+
+        public GameObject(List<string> tags, string objName)
+        {
+            Name = "defObject";
+            Tags = tags;
+            ObjName = objName;
+        }
+
+        public GameObject(string objName)
+        {
+            Name = "defObject";
+            Tags = new List<string>();
+            ObjName = objName;
         }
 
         public static void Loaded(GameObject obj)
@@ -477,15 +512,21 @@ namespace engine // This whole thing has a massive memory leak somewhere!
             return WorldSpaceCoords;
         }
 
-        public static void MoveWithCollision(GameObject _obj, Vector2 _moveAmount, Booter booter, CollisionManager colMan) // clean up later by storing important objects such as booter and collision manager in one class
+        public static int MoveWithCollision(GameObject _obj, Vector2 _moveAmount, Booter booter, CollisionManager colMan) // clean up later by storing important objects such as booter and collision manager in one class
         {
+            SpriteRenderer spriteRenderer = (SpriteRenderer)_obj.GetComponent("SpriteRenderer");
+
+            if (spriteRenderer == null)
+                return 1; // fail - No SpriteRenderer on specified GameObject
+
             Vector2 NextPos = _obj.WorldPosition + _moveAmount;
             Vector2 ScreenNextPos = WorldToScreenSpace(booter, NextPos);
-            Vector2 MaxWorldSpacePos = ScreenToWorldSpace(booter, new Vector2(ScreenNextPos.X + _obj.Scale.X * _obj.TextureRes.X, ScreenNextPos.Y + _obj.Scale.Y * _obj.TextureRes.Y));
+            Vector2 MaxWorldSpacePos = ScreenToWorldSpace(booter, new Vector2(ScreenNextPos.X + _obj.Scale.X * spriteRenderer.TextureRes.X, ScreenNextPos.Y + _obj.Scale.Y * spriteRenderer.TextureRes.Y));
             Vector4 NextCollisionRect = new Vector4(NextPos.X, MaxWorldSpacePos.Y, MaxWorldSpacePos.X, NextPos.Y);
             Collider col = (Collider)_obj.GetComponent("SquareCollider");
             if (colMan.CollideRect(NextCollisionRect, col) == null)
                 _obj.WorldPosition = NextPos;
+            return 0; // successfull
         }
 
         public Component GetComponent(string _type)
@@ -518,6 +559,47 @@ namespace engine // This whole thing has a massive memory leak somewhere!
             }
 
             return comp;
+        }
+    }
+
+    public class SpriteRenderer : Component
+    {
+        public string TexturePath;
+        public Vector2 TextureRes;
+        public Vector4 TextureColour;
+        public bool FlipX;
+        public bool FlipY;
+
+        public SpriteRenderer(GameObject bindingObj, string path) : base("SpriteRenderer", bindingObj)
+        {
+            TexturePath = path;
+            TextureColour = Engine.White;
+            FlipX = false;
+            FlipY = false;
+        }
+
+        public SpriteRenderer(GameObject bindingObj, string path, Vector4 colour) : base("SpriteRenderer", bindingObj)
+        {
+            TexturePath = path;
+            TextureColour = colour;
+            FlipX = false;
+            FlipY = false;
+        }
+
+        public SpriteRenderer(GameObject bindingObj, string path, Vector4 colour, bool flipX, bool flipY) : base("SpriteRenderer", bindingObj)
+        {
+            TexturePath = path;
+            TextureColour = colour;
+            FlipX = flipX;
+            FlipY = flipY;
+        }
+
+        public SpriteRenderer(GameObject bindingObj, string path, bool flipX, bool flipY) : base("SpriteRenderer", bindingObj)
+        {
+            TexturePath = path;
+            TextureColour = Engine.White;
+            FlipX = flipX;
+            FlipY = flipY;
         }
     }
 

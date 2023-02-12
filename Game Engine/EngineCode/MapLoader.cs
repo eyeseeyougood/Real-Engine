@@ -201,10 +201,12 @@ namespace Game_Engine
                         }
                         Vector2 offset = new Vector2(float.Parse(offsetstring.Substring(0, t)), float.Parse(offsetstring.Substring(t + 1)));
                         // load object
-                        GameObject Obj = new GameObject(GameData_Path + $@"\{TextureMAP[Key[pixel]]}.png", Engine.White);
+                        GameObject Obj = new GameObject();
                         Obj.WorldPosition = new Vector2(z - CameraPosition.X + offset.X, MapHeight - y - CameraPosition.Y + offset.Y);
                         Obj.Scale = new Vector2(1, 1);
                         Obj.ObjName = Key[pixel];
+
+                        SpriteRenderer sR = new SpriteRenderer(Obj, GameData_Path + $@"\{TextureMAP[Key[pixel]]}.png");
 
                         if (TagMAP.ContainsKey(Key[pixel]))
                             Obj.Tags.Add(TagMAP[Key[pixel]]); // fetch tag based on obj name (obj name is gotten using the pixel)

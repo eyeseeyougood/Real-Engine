@@ -25,6 +25,13 @@ namespace Game_Engine
 
             return Plr;
         }
+
+        public static SpriteRenderer spriteRenderer()
+        {
+            SpriteRenderer renderer = (SpriteRenderer)player().GetComponent("SpriteRenderer");
+
+            return renderer;
+        }
         public static void Movement(Vector2 _moveAmount)
         {
             GameObject Plr = null;
@@ -44,10 +51,13 @@ namespace Game_Engine
 
         public static void SetSprite(int sprite)
         {
-            // 1 = facing right
-            // 0 = facing left
+            SpriteRenderer spriteRenderer = (SpriteRenderer)player().GetComponent("SpriteRenderer");
 
-            player().TexturePath = sprites[sprite];
+            if (spriteRenderer == null)
+                return; // no renderer so return out
+
+            spriteRenderer.FlipY = true;
+            spriteRenderer.TexturePath = sprites[sprite];
         }
         public static void AddComponent(Component component)
         {

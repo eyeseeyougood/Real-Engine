@@ -243,8 +243,13 @@ namespace Game_Engine
 
         public void ColliderTick(Booter _instance)
         {
+            SpriteRenderer spriteRenderer = (SpriteRenderer)BoundObject.GetComponent("SpriteRenderer");
+
+            if (spriteRenderer == null)
+                return; // Don't Complete Tick - No SpriteRenderer - POTENTIALLY DANGEROUS CODE - Must Fix Later with error system
+
             MinPoint = GameObject.WorldToScreenSpace( _instance, BoundObject.WorldPosition );
-            MaxPoint = MinPoint + new Vector2(BoundObject.Scale.X * BoundObject.TextureRes.X, BoundObject.Scale.Y * BoundObject.TextureRes.Y) * 2;
+            MaxPoint = MinPoint + new Vector2(BoundObject.Scale.X * spriteRenderer.TextureRes.X, BoundObject.Scale.Y * spriteRenderer.TextureRes.Y) * 2;
 
             float MinPointYBeforeChange = MinPoint.Y;
             MinPoint = new Vector2(MinPoint.X, MaxPoint.Y);
