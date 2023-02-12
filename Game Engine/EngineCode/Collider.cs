@@ -25,6 +25,7 @@ namespace Game_Engine
         public List<Collider> Colliders = new List<Collider>();
         public Dictionary<string, string> functionsMap = new Dictionary<string, string>(); // (bound)object name to function name
         public Dictionary<string, string> ClassMap = new Dictionary<string, string>(); // (bound)object name to class name
+        public Dictionary<string, List<string>> ArgsMap = new Dictionary<string, List<string>>(); // (bound)object name to Args Map
 
         public CollisionManager()
         {
@@ -33,8 +34,8 @@ namespace Game_Engine
 
         public void ColliderTick(Booter instance)
         {
-            object[] args = new object[3];
-            MethodInfo method = null;
+            List<MethodInfo> Methods = new List<MethodInfo>();
+            List<object[]> Args = new List<object[]>();
 
             foreach (SquareCollider collider in Colliders)
             {
@@ -44,19 +45,41 @@ namespace Game_Engine
                     Collider triggeredObj = TriggerRect(collider);
                     if (triggeredObj != null)
                     {
+                        object[] args = new object[ArgsMap[triggeredObj.BoundObject.ObjName].Count];
+                        MethodInfo method = null;
+
                         Type t = Type.GetType($@"Game_Engine.{ClassMap[triggeredObj.BoundObject.ObjName]}");
                         method
                              = t.GetMethod(functionsMap[triggeredObj.BoundObject.ObjName], BindingFlags.Static | BindingFlags.Public);
 
-                        args[0] = instance;
-                        args[1] = this;
-                        args[2] = triggeredObj;
+                        int x = 0;
+                        foreach(string i in ArgsMap[triggeredObj.BoundObject.ObjName])
+                        {
+                            switch (i)
+                            {
+                                case "":
+                                    Console.WriteLine("NO VALID ARGUMENTS PASSED IN TA FILE!");
+                                    break;
+                                case "self":
+                                    args[x] = triggeredObj;
+                                    break;
+                            }
+                            x++;
+                        }
+
+                        Methods.Add(method);
+                        Args.Add(args);
                     }
                 }
             }
 
-            if (method != null)
-                method.Invoke(null, args);
+            int methodIndex = 0;
+            foreach (MethodInfo method in Methods)
+            {
+                if (method != null)
+                    method.Invoke(null, Args[methodIndex]);
+                methodIndex++;
+            }
         }
 
         public bool CheckPoint(Vector2 Position)

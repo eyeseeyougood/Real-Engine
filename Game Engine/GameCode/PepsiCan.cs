@@ -9,7 +9,7 @@ namespace Game_Engine
 {
     public class PepsiCan
     {
-        public static void Pickup(Booter _instance, CollisionManager colMan, Collider pepsican)
+        public static void Pickup(Collider pepsican)
         {
             if (PepsiManager.PepsiCansList.Contains(pepsican))
             {

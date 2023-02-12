@@ -138,6 +138,9 @@ namespace Game_Engine
                         continue;
                     colMan.functionsMap.Add(i, ObjectProperties[2].Substring(16));
                     colMan.ClassMap.Add(i, i);
+                    // Load Arguments
+                    string[] args = File.ReadAllLines(ProjPath + $@"\ExternalInfo\GameObjects\TriggerArgs\{i}TA.txt");
+                    colMan.ArgsMap.Add(i, args.ToList());
                 }
             }
 
