@@ -3,11 +3,13 @@ using System.Linq;
 using System.Numerics;
 using engine;
 using Game_Engine;
+using Game_Engine.Audio;
 using Game_Engine.Shaders;
 using SDL2;
 
 Booter booter = new Booter();
 CollisionManager collisionManager = new CollisionManager();
+AudioManager audioManager = new AudioManager();
 
 booter.SetBGColour(new Vector3(50, 50, 50));
 
@@ -76,6 +78,11 @@ void OnSetup() // same as start
     //gravity.Strength = 1f;
     //Player.player().Components.Add(gravity);
     //Console.WriteLine(Player.player().Components[1]);
+
+    audioManager.CreatePlayer();
+    Console.WriteLine($"projPath: {projectDirectory}");
+    Console.WriteLine($"workingPath: {workingDirectory}");
+    audioManager.PlayWavLooped(projectDirectory + @"\GameData\Audio\Music\slowing.wav");
 
     // setup player sprites
     foreach (string path in EngineManager.booterInstance.instance.PathToIndex.Keys)
