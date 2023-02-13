@@ -9,8 +9,11 @@ namespace Game_Engine
 {
     public class PepsiCan
     {
-        public static void Pickup(Collider pepsican)
+        public static void Pickup(Collider pepsican, Collider other)
         {
+            if (!other.BoundObject.Tags.Contains("Player")) // other collider must be the player
+                return;
+
             if (PepsiManager.PepsiCansList.Contains(pepsican))
             {
                 pepsican.BoundObject.Destroy();

@@ -40,36 +40,41 @@ namespace Game_Engine
             foreach (SquareCollider collider in Colliders)
             {
                 collider.ColliderTick(instance);
-                if (collider.BoundObject.Tags.Contains("Player"))
+                Collider triggeredObj = null;
+                if (TriggerRect(collider).Length != 0)
                 {
-                    Collider triggeredObj = TriggerRect(collider);
-                    if (triggeredObj != null)
+                    triggeredObj = TriggerRect(collider)[0];
+                }
+                    
+                if (triggeredObj != null)
+                {
+                    object[] args = new object[ArgsMap[triggeredObj.BoundObject.ObjName].Count];
+                    MethodInfo method = null;
+
+                    Type t = Type.GetType($@"Game_Engine.{ClassMap[triggeredObj.BoundObject.ObjName]}");
+                    method
+                            = t.GetMethod(functionsMap[triggeredObj.BoundObject.ObjName], BindingFlags.Static | BindingFlags.Public);
+
+                    int x = 0;
+                    foreach(string i in ArgsMap[triggeredObj.BoundObject.ObjName])
                     {
-                        object[] args = new object[ArgsMap[triggeredObj.BoundObject.ObjName].Count];
-                        MethodInfo method = null;
-
-                        Type t = Type.GetType($@"Game_Engine.{ClassMap[triggeredObj.BoundObject.ObjName]}");
-                        method
-                             = t.GetMethod(functionsMap[triggeredObj.BoundObject.ObjName], BindingFlags.Static | BindingFlags.Public);
-
-                        int x = 0;
-                        foreach(string i in ArgsMap[triggeredObj.BoundObject.ObjName])
+                        switch (i)
                         {
-                            switch (i)
-                            {
-                                case "":
-                                    Console.WriteLine("NO VALID ARGUMENTS PASSED IN TA FILE!");
-                                    break;
-                                case "self":
-                                    args[x] = triggeredObj;
-                                    break;
-                            }
-                            x++;
+                            case "":
+                                Console.WriteLine("NO VALID ARGUMENTS PASSED IN TA FILE!");
+                                break;
+                            case "self":
+                                args[x] = triggeredObj; // trigger collider
+                                break;
+                            case "other":
+                                args[x] = collider; // other collider
+                                break;
                         }
-
-                        Methods.Add(method);
-                        Args.Add(args);
+                        x++;
                     }
+
+                    Methods.Add(method);
+                    Args.Add(args);
                 }
             }
 
@@ -197,14 +202,14 @@ namespace Game_Engine
         }
 
         // trigger
-        public SquareCollider TriggerRect(SquareCollider collider)
+        public SquareCollider[] TriggerRect(SquareCollider collider)
         {
             Vector2 MinPoint = collider.MinPoint;
             Vector2 MaxPoint = collider.MaxPoint;
-            SquareCollider res = null;
+            List<SquareCollider> res = new List<SquareCollider>();
             foreach (SquareCollider i in Colliders)
             {
-                if (i.isTrigger)
+                if (i.isTrigger && i != collider)
                 {
                     Vector2 MinPoint1 = i.MinPoint;
                     Vector2 MaxPoint1 = i.MaxPoint;
@@ -223,12 +228,12 @@ namespace Game_Engine
 
                     if (thisone)
                     {
-                        res = i;
+                        res.Add(i);
                         break;
                     }
                 }
             }
-            return res;
+            return res.ToArray();
         }
     }
     public abstract class Collider : Component
